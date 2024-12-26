@@ -1,18 +1,18 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Card, CardContent, CardHeader, Grid, TextField, InputAdornment, Alert, Snackbar, Button, IconButton, Table, TableBody, TableCell, TableRow } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers';
-import { generateAutomaticBoleto, createBoleto } from '@/app/actions';
-import { BoletoFormData, boletoSchema } from '@/schemas/boleto.schema';
-import { DateTime } from 'luxon';
-import ReceiptIcon from '@mui/icons-material/Receipt';
+import { generateAutomaticBoleto } from '@/app/actions';
 import AutoGeneratorButton from '@/components/AutoGeneratorButton';
+import { BoletoFormData, boletoSchema } from '@/schemas/boleto.schema';
+import Boleto from '@/server/db/boleto.model';
+import connectDB from '@/server/db/mongoose';
+import { zodResolver } from '@hookform/resolvers/zod';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import { Alert, Box, Button, Card, CardContent, CardHeader, Grid, InputAdornment, Snackbar, TextField } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers';
+import { DateTime } from 'luxon';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import QrCodeIcon from '@mui/icons-material/QrCode';
-import BoletoList from './BoletoList'; // Import the BoletoList component
+import { Controller, useForm } from 'react-hook-form';
 
 export default function CreateBoletoForm() {
   const router = useRouter();
@@ -20,8 +20,7 @@ export default function CreateBoletoForm() {
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [boletoCode, setBoletoCode] = useState('');
-  const [generatedDate, setGeneratedDate] = useState<Date | null>(null);
+
 
   const { control, handleSubmit, reset, formState: { errors } } = useForm<BoletoFormData>({
     resolver: zodResolver(boletoSchema),
@@ -34,7 +33,6 @@ export default function CreateBoletoForm() {
 
   const onSubmit = async (data: BoletoFormData) => {
     try {
-      await createBoleto(data);
       reset();
       setShowSuccess(true);
       router.refresh();
@@ -45,29 +43,25 @@ export default function CreateBoletoForm() {
   };
 
   const handleGenerateAutomatic = async () => {
-    console.log('Generating boleto...');
     try {
-        setIsGenerating(true);
+      setIsGenerating(true);
 
-        // Call the action to generate the boleto
-        const generatedBoleto = await generateAutomaticBoleto();
+      // Call the action to generate the boleto
+      const generatedBoleto = await generateAutomaticBoleto();
 
-        setShowSuccess(true);
-        router.refresh();
+      setShowSuccess(true);
+      router.refresh();
     } catch (error) {
-        setErrorMessage('Erro ao gerar boleto automático. Tente novamente.');
-        setShowError(true);
+      setErrorMessage('Erro ao gerar boleto automático. Tente novamente.');
+      setShowError(true);
     } finally {
-        setIsGenerating(false);
+      setIsGenerating(false);
     }
   };
 
   const handleGenerateBoletoCode = async () => {
-    console.log('Generating boleto code...');
     try {
       const generatedBoletoCode = await generateAutomaticBoleto();
-      setBoletoCode(generatedBoletoCode.code);
-      setGeneratedDate(new Date());
     } catch (error) {
       setErrorMessage('Erro ao gerar código do boleto. Tente novamente.');
       setShowError(true);
@@ -192,11 +186,6 @@ export default function CreateBoletoForm() {
                 </Button>
               </Box>
             </Grid>
-            <Grid item xs={12}>
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <Button onClick={handleGenerateBoletoCode}>Gerar Código do Boleto</Button>
-              </Box>
-            </Grid>
           </Grid>
         </Box>
       </CardContent>
@@ -205,9 +194,9 @@ export default function CreateBoletoForm() {
         open={showSuccess}
         autoHideDuration={3000}
         onClose={() => setShowSuccess(false)}
-        anchorOrigin={{ 
+        anchorOrigin={{
           vertical: 'top',
-          horizontal: window?.innerWidth >= 900 ? 'right' : 'center'
+          horizontal: typeof window !== 'undefined' && window?.innerWidth >= 900 ? 'right' : 'center'
         }}
         sx={{
           position: 'fixed',
@@ -228,9 +217,9 @@ export default function CreateBoletoForm() {
         open={showError}
         autoHideDuration={3000}
         onClose={() => setShowError(false)}
-        anchorOrigin={{ 
+        anchorOrigin={{
           vertical: 'top',
-          horizontal: window?.innerWidth >= 900 ? 'right' : 'center'
+          horizontal: typeof window !== 'undefined' && window?.innerWidth >= 900 ? 'right' : 'center'
         }}
         sx={{
           position: 'fixed',

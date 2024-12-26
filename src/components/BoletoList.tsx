@@ -1,13 +1,28 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { deleteBoleto, updateBoletoStatus } from '@/app/actions';
+import { RendimentoBoletoResponse } from '@/interfaces/rendimento-boleto.interface';
+import { BoletoStatus } from '@/types/boleto';
+import { formatarData, formatarMoeda } from '@/utils/formatadores';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DeleteIcon from '@mui/icons-material/Delete';
 import {
+  Alert,
   Box,
+  Button,
   Card,
   CardContent,
   CardHeader,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   IconButton,
+  Snackbar,
   Table,
   TableBody,
   TableCell,
@@ -15,27 +30,12 @@ import {
   TableHead,
   TableRow,
   Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button,
-  Chip,
-  Snackbar,
-  Alert,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { Boleto, BoletoStatus } from '@/types/boleto';
-import { formatarData, formatarMoeda } from '@/utils/formatadores';
-import { deleteBoleto, updateBoletoStatus } from '@/app/actions';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface BoletoListProps {
-  boletos: Boleto[];
-  generatedDate: Date | null;
+  boletos: RendimentoBoletoResponse[];
 }
 
 interface DeleteDialogProps {
@@ -78,10 +78,10 @@ const statusLabels: Record<BoletoStatus, string> = {
   cancelled: 'Cancelado',
 };
 
-export default function BoletoList({ boletos = [], generatedDate }: BoletoListProps) {
+export default function BoletoList(props: BoletoListProps) {
   const router = useRouter();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedBoleto, setSelectedBoleto] = useState<Boleto | null>(null);
+  const [selectedBoleto, setSelectedBoleto] = useState<RendimentoBoletoResponse | null>(null);
   const [showCopySuccess, setShowCopySuccess] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -92,7 +92,7 @@ export default function BoletoList({ boletos = [], generatedDate }: BoletoListPr
   const handleDelete = async () => {
     if (!selectedBoleto) return;
     
-    await deleteBoleto(selectedBoleto.id);
+    await deleteBoleto(selectedBoleto.linhaDigitavel);
     setDeleteDialogOpen(false);
     setSelectedBoleto(null);
     router.refresh();
@@ -103,7 +103,7 @@ export default function BoletoList({ boletos = [], generatedDate }: BoletoListPr
     router.refresh();
   };
 
-  const openDeleteDialog = (boleto: Boleto) => {
+  const openDeleteDialog = (boleto: RendimentoBoletoResponse) => {
     setSelectedBoleto(boleto);
     setDeleteDialogOpen(true);
   };
@@ -135,14 +135,13 @@ export default function BoletoList({ boletos = [], generatedDate }: BoletoListPr
                 <TableCell>Código</TableCell>
                 <TableCell>Valor</TableCell>
                 <TableCell>Vencimento</TableCell>
-                <TableCell>Data de Geração</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell align="right">Ações</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {boletos.map((boleto) => (
-                <TableRow key={boleto.id}>
+              {props.boletos.map((boleto) => (
+                <TableRow key={boleto.linhaDigitavel}>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Box 
@@ -158,23 +157,20 @@ export default function BoletoList({ boletos = [], generatedDate }: BoletoListPr
                           userSelect: 'all'
                         }}
                       >
-                        {boleto.code}
+                        {boleto.linhaDigitavel}
                       </Box>
                       <Tooltip title="Copiar código">
                         <IconButton
                           size="small"
-                          onClick={() => handleCopyCode(boleto.code)}
+                          onClick={() => handleCopyCode(boleto.linhaDigitavel)}
                         >
                           <ContentCopyIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                     </Box>
                   </TableCell>
-                  <TableCell>{formatarMoeda(boleto.amount)}</TableCell>
-                  <TableCell>{formatarData(boleto.dueDate)}</TableCell>
-                  <TableCell>{
-                    formatarData(boleto.createdAt)
-                    }</TableCell>
+                  <TableCell>{formatarMoeda(boleto.valor)}</TableCell>
+                  <TableCell>{formatarData(boleto.dataVencimento)}</TableCell>
                   <TableCell>
                     <Chip
                       label={statusLabels[boleto.status]}
@@ -190,7 +186,7 @@ export default function BoletoList({ boletos = [], generatedDate }: BoletoListPr
                             <IconButton
                               size="small"
                               color="success"
-                              onClick={() => handleStatusUpdate(boleto.id, 'paid')}
+                              onClick={() => handleStatusUpdate(boleto.linhaDigitavel, 'paid')}
                             >
                               <CheckCircleIcon />
                             </IconButton>
@@ -199,7 +195,7 @@ export default function BoletoList({ boletos = [], generatedDate }: BoletoListPr
                             <IconButton
                               size="small"
                               color="error"
-                              onClick={() => handleStatusUpdate(boleto.id, 'cancelled')}
+                              onClick={() => handleStatusUpdate(boleto.linhaDigitavel, 'cancelled')}
                             >
                               <CancelIcon />
                             </IconButton>
@@ -227,7 +223,7 @@ export default function BoletoList({ boletos = [], generatedDate }: BoletoListPr
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
         onConfirm={handleDelete}
-        boletoCode={selectedBoleto?.code ?? ''}
+        boletoCode={selectedBoleto?.linhaDigitavel ?? ''}
       />
       <Snackbar
         open={showCopySuccess}

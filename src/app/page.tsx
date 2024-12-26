@@ -1,11 +1,20 @@
-import { getBoletos } from './actions';
-import CreateBoletoForm from '@/components/CreateBoletoForm';
 import BoletoList from '@/components/BoletoList';
+import CreateBoletoForm from '@/components/CreateBoletoForm';
+import Boleto from '@/server/db/boleto.model';
+import connectDB from '@/server/db/mongoose';
 import { Box, Typography } from '@mui/material';
 import { Suspense } from 'react';
 
 export default async function Home() {
-  const boletos = await getBoletos();
+  await connectDB();
+  const _boletos = await Boleto.find({});
+
+  const boletos = _boletos.map((_b) => {
+    const {_id, ...boleto} = _b.toObject();
+    return {
+      ...boleto,
+    };
+  });
 
   return (
     <Box 

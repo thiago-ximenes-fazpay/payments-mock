@@ -6,10 +6,15 @@ export function formatarData(data: string): string {
 }
 
 export function formatarMoeda(valor: number): string {
-  return valor.toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  });
+    if (typeof valor !== 'number' || isNaN(valor)) {
+        return 'Valor inválido';
+    }
+    return valor.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
 }
 
 export const formatStatus = (status: BoletoStatus): string => {

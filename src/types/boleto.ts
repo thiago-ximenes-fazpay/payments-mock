@@ -1,12 +1,5 @@
+import { RendimentoBoletoResponse } from "@/interfaces/rendimento-boleto.interface";
+
 export type BoletoStatus = 'pending' | 'paid' | 'cancelled';
 
-export interface Boleto {
-  id: string;
-  code: string;
-  amount: number;
-  dueDate: string;
-  status: BoletoStatus;
-  createdAt: string;
-}
-
-export type CreateBoletoInput = Omit<Boleto, 'id' | 'createdAt' | 'status'>;
+export type CreateBoletoInput = Omit<RendimentoBoletoResponse, 'id' | 'createdAt' | 'status'>;
