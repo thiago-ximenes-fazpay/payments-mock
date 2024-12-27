@@ -1,10 +1,8 @@
 'use client';
 
-import { generateAutomaticBoleto } from '@/app/actions';
+import { createAutomaticBoleto } from '@/app/actions';
 import AutoGeneratorButton from '@/components/AutoGeneratorButton';
 import { BoletoFormData, boletoSchema } from '@/schemas/boleto.schema';
-import Boleto from '@/server/db/boleto.model';
-import connectDB from '@/server/db/mongoose';
 import { zodResolver } from '@hookform/resolvers/zod';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import { Alert, Box, Button, Card, CardContent, CardHeader, Grid, InputAdornment, Snackbar, TextField } from '@mui/material';
@@ -46,8 +44,7 @@ export default function CreateBoletoForm() {
     try {
       setIsGenerating(true);
 
-      // Call the action to generate the boleto
-      const generatedBoleto = await generateAutomaticBoleto();
+     await createAutomaticBoleto();
 
       setShowSuccess(true);
       router.refresh();
@@ -56,15 +53,6 @@ export default function CreateBoletoForm() {
       setShowError(true);
     } finally {
       setIsGenerating(false);
-    }
-  };
-
-  const handleGenerateBoletoCode = async () => {
-    try {
-      const generatedBoletoCode = await generateAutomaticBoleto();
-    } catch (error) {
-      setErrorMessage('Erro ao gerar código do boleto. Tente novamente.');
-      setShowError(true);
     }
   };
 

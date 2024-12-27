@@ -1,27 +1,26 @@
-import { oauthConfig } from "@/config/oauthConfig";
+import { getBoletoByLine } from "@/app/actions";
 import { HttpStatus } from "@/constants/HttpStatus";
 import Boleto from "@/server/db/boleto.model";
-import connectDB from "@/server/db/mongoose";
+import { hasRendimentoToken } from "@/utils/rendimento-token.middleware";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
-  if (req.headers.get('Authorization') !== `Bearer ${oauthConfig.bearerToken}`) {
-    return NextResponse.json(
-      {
-        error: 'Unauthorized',
-      },
+  if (!hasRendimentoToken(req.headers.get('access_token')!)) {
+    return NextResponse.json({
+      error: 'Unauthorized',
+    },
       {
         status: HttpStatus.UNAUTHORIZED,
-      }
-    )
+      })
   }
 
-  const line = (await req.json()).line;
+const body = await req.json();
 
-  await connectDB();
-  const boleto = await Boleto.findOne({ linhaDigitavel: line });
+  const line = body.linhaDigitavel;
+
+  const boleto = await getBoletoByLine(line);
 
   if (!boleto) {
     return NextResponse.json({
@@ -32,6 +31,6 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({
-    boleto,
+    value: boleto,
   })
 }

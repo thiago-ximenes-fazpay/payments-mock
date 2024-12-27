@@ -21,7 +21,7 @@ export const formatStatus = (status: BoletoStatus): string => {
   const statusMap: Record<BoletoStatus, string> = {
     pending: 'Pendente',
     paid: 'Pago',
-    expired: 'Vencido'
+    cancelled: 'Cancelado'
   };
   return statusMap[status];
 };
@@ -30,7 +30,7 @@ export const getStatusColor = (status: BoletoStatus): 'default' | 'success' | 'e
   const colorMap: Record<BoletoStatus, 'default' | 'success' | 'error'> = {
     pending: 'default',
     paid: 'success',
-    expired: 'error'
+    cancelled: 'error'
   };
   return colorMap[status];
 };

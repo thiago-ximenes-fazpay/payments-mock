@@ -2,10 +2,8 @@
 
 import { RendimentoBoletoResponse } from '@/interfaces/rendimento-boleto.interface';
 import Boleto from '@/server/db/boleto.model';
-import connectDB from '@/server/db/mongoose';
 import BarcodeGenerator from '@/services/BarcodeGenerator';
 import { BoletoStatus } from '@/types/boleto';
-import boletos from '@/utils/BoletoSingleton';
 import { faker, fakerPT_BR } from '@faker-js/faker';
 import { DateTime } from 'luxon';
 import { revalidatePath } from 'next/cache';
@@ -16,7 +14,9 @@ function generateBoletoCode() {
 }
 
 export async function getBoletos() {
-  return boletos.getAllBoletos()
+  return Boleto.find().sort({
+    _id: -1
+  });
 }
 
 function generateRandomDigits(length: number): string {
@@ -46,6 +46,13 @@ function generateRandomCode(): string {
 
 export async function createAutomaticBoleto() {
 
+  const value = Number((faker.number.float({ min: 10, max: 10000 })).toFixed(2));
+  const multa = Number((faker.number.float({ min: 0, max: 10 })).toFixed(2));
+  const juros = Number((faker.number.float({ min: 0, max: 10 })).toFixed(2));
+  const valorTotal = value + multa + juros;
+
+  const desconto = Number((faker.number.float({ min: 0, max: 10 })).toFixed(2));
+
   const newBoleto: RendimentoBoletoResponse = {
     linhaDigitavel: BarcodeGenerator.generateBarcode('BANCO'),
     codigoDeBarras: generateRandomCode(),
@@ -58,23 +65,19 @@ export async function createAutomaticBoleto() {
     ),
     nomePagador: fakerPT_BR.person.fullName(),
     dataVencimento: fakerPT_BR.date.future().toISOString().split('T')[0],
-    valor: faker.number.float({ min: 10, max: 10000 }),
-    multa: faker.number.float({ min: 0, max: 10 }),
-    desconto: faker.number.float({ min: 0, max: 10 }),
-    juros: faker.number.float({ min: 0, max: 10 }),
+    valor: value,
+    multa,
+    desconto,
+    juros,
     status: 'pending',
+    valorTotal: valorTotal - desconto
   } as const as RendimentoBoletoResponse
 
-  await connectDB();
   await Boleto.create(newBoleto);
 
   revalidatePath('/');
 
   return newBoleto;
-}
-
-export async function generateAutomaticBoleto() {
-  return await createAutomaticBoleto();
 }
 
 export async function createBoleto(data: {
@@ -102,7 +105,7 @@ export async function createBoleto(data: {
     juros: faker.number.float({ min: 0, max: 10 }),
   }
 
-  await connectDB();
+
   await Boleto.create(newBoleto);
   revalidatePath('/');
 
@@ -110,18 +113,23 @@ export async function createBoleto(data: {
 }
 
 export async function updateBoletoStatus(line: string, status: BoletoStatus) {
-  await connectDB();
+
   await Boleto.updateOne({ linhaDigitavel: line }, { $set: { status } });
   revalidatePath('/');
 }
 
 export async function deleteBoleto(line: string) {
-  await connectDB();
+
   await Boleto.deleteOne({ linhaDigitavel: line });
   revalidatePath('/');
 }
 
 export async function getBoletoByLine(line: string) {
-  await connectDB();
+
   return Boleto.findOne({ linhaDigitavel: line });
+}
+
+export async function getBoletoByBarCode(barCode: string) {
+
+  return Boleto.findOne({ codigoDeBarras: barCode });
 }

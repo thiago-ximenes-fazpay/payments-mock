@@ -85,6 +85,6 @@ const BoletoSchema: Schema = new Schema({
   status: { type: String, required: true },
 });
 
-const Boleto = mongoose.models?.Boleto || mongoose.model<IBoleto>('Boleto', BoletoSchema);
+const Boleto = (mongoose.models?.Boleto || mongoose.model<IBoleto>('Boleto', BoletoSchema)) as mongoose.Model<IBoleto>;
 
 export default Boleto;
