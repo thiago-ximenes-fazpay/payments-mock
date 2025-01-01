@@ -6,7 +6,7 @@ config();
 const envSchema = z.object({
   BASIC_ACCESS_TOKEN: z.string().nonempty(),
   BEARER_TOKEN: z.string().nonempty(),
-  DB_URL: z.string().url().nonempty(),
+  DB_URL: z.string().nonempty(),
 });
 
 /**
