@@ -65,8 +65,8 @@ export async function createBoleto(data: {
   const multa = data.multa || 0;
   const desconto = data.desconto || 0;
   const juros = data.juros || 0;
-  const valor = data.amount;
-  const valorTotal = valor - desconto + multa + juros;
+  const valor = data.amount - desconto + multa + juros;
+  const valorTotal = data.amount - desconto + multa + juros;
 
   const newBoleto: Partial<RendimentoBoletoResponse> = {
     ...data,
