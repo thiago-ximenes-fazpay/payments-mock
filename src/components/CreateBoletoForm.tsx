@@ -55,7 +55,6 @@ export default function CreateBoletoForm() {
 
   const onSubmit = async (data: BoletoFormData) => {
     try {
-      setIsGenerating(true);
       await createBoleto(data);
       reset();
       setShowSuccess(true);
