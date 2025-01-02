@@ -43,6 +43,9 @@ export default function CreateBoletoForm() {
     defaultValues: {
       code: "",
       amount: 0,
+      multa: 0,
+      desconto: 0,
+      juros: 0,
       dueDate: DateTime.now().plus({ days: 5 }).toISO(),
     },
   });
@@ -180,6 +183,7 @@ export default function CreateBoletoForm() {
                 )}
               />
             </Grid>
+
             <Grid item xs={12} md={2}>
               <Controller
                 name="dueDate"
@@ -203,6 +207,103 @@ export default function CreateBoletoForm() {
                 )}
               />
             </Grid>
+
+            <Grid item xs={12} md={4}>
+              <Controller
+                name="desconto"
+                control={control}
+                render={({ field: { onChange, value, ...field } }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Desconto"
+                    type="number"
+                    error={!!errors.desconto}
+                    helperText={errors.desconto?.message}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value);
+                      onChange(isNaN(value) ? 0 : value);
+                    }}
+                    value={value === 0 ? "" : value}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">R$</InputAdornment>
+                      ),
+                    }}
+                    inputProps={{
+                      step: "0.01",
+                      min: "0",
+                      max: "999999.99",
+                    }}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              <Controller
+                name="juros"
+                control={control}
+                render={({ field: { onChange, value, ...field } }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Juros"
+                    type="number"
+                    error={!!errors.juros}
+                    helperText={errors.juros?.message}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value);
+                      onChange(isNaN(value) ? 0 : value);
+                    }}
+                    value={value === 0 ? "" : value}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">R$</InputAdornment>
+                      ),
+                    }}
+                    inputProps={{
+                      step: "0.01",
+                      min: "0",
+                      max: "999999.99",
+                    }}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              <Controller
+                name="multa"
+                control={control}
+                render={({ field: { onChange, value, ...field } }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Multa"
+                    type="number"
+                    error={!!errors.multa}
+                    helperText={errors.multa?.message}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value);
+                      onChange(isNaN(value) ? 0 : value);
+                    }}
+                    value={value === 0 ? "" : value}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">R$</InputAdornment>
+                      ),
+                    }}
+                    inputProps={{
+                      step: "0.01",
+                      min: "0",
+                      max: "999999.99",
+                    }}
+                  />
+                )}
+              />
+            </Grid>
+
             <Grid item xs={12}>
               <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
                 <Button

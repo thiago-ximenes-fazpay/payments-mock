@@ -55,14 +55,24 @@ export async function createAutomaticBoleto() {
 
 export async function createBoleto(data: {
   code: string;
-  amount: number;
   dueDate: string;
+  amount: number;
+  //optional
+  multa?: number;
+  desconto?: number;
+  juros?: number;
 }) {
+  const multa = data.multa || 0;
+  const desconto = data.desconto || 0;
+  const juros = data.juros || 0;
+  const valor = data.amount;
+  const valorTotal = valor - desconto + multa + juros;
+
   const newBoleto: Partial<RendimentoBoletoResponse> = {
     ...data,
     status: "pending",
     linhaDigitavel: BarcodeGenerator.generateBarcode("BANCO"),
-    codigoDeBarras: generateBoletoCode(),
+    codigoDeBarras: data.code,
     nomeBeneficiario: fakerPT_BR.person.fullName(),
     cnpjcpfBeneficiario: fakerPT_BR.helpers.arrayElement([
       faker.string.numeric(11),
@@ -70,10 +80,11 @@ export async function createBoleto(data: {
     ]),
     nomePagador: fakerPT_BR.person.fullName(),
     dataVencimento: DateTime.fromISO(data.dueDate).toFormat("yyyy-MM-dd"),
-    valor: data.amount,
-    multa: faker.number.float({ min: 0, max: 10 }),
-    desconto: faker.number.float({ min: 0, max: 10 }),
-    juros: faker.number.float({ min: 0, max: 10 }),
+    valor,
+    valorTotal,
+    multa,
+    desconto,
+    juros,
   };
 
   await Boleto.create(newBoleto);
