@@ -1,12 +1,12 @@
 import BoletoList from '@/components/BoletoList';
 import CreateBoletoForm from '@/components/CreateBoletoForm';
-import connectDB from '@/server/db/mongoose';
 import { Box, Typography } from '@mui/material';
 import { Suspense } from 'react';
 import { getBoletos } from './actions';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
-  await connectDB();
   const _boletos = await getBoletos();
 
   const boletos = _boletos.map((_b) => {

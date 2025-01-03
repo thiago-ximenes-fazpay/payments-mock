@@ -2,6 +2,7 @@
 
 import { RendimentoBoletoResponse } from "@/interfaces/rendimento-boleto.interface";
 import Boleto from "@/server/db/boleto.model";
+import connectDB from "@/server/db/mongoose";
 import BarcodeGenerator from "@/services/BarcodeGenerator";
 import { BoletoStatus } from "@/types/boleto";
 import { generateRandomCode } from "@/utils/generateData";
@@ -10,6 +11,7 @@ import { DateTime } from "luxon";
 import { revalidatePath } from "next/cache";
 
 export async function getBoletos() {
+  await connectDB();
   return Boleto.find().sort({
     _id: -1,
   });
@@ -41,6 +43,7 @@ export async function createAutomaticBoleto() {
     valorTotal: valorTotal - desconto,
   } as const as RendimentoBoletoResponse;
 
+  await connectDB();
   await Boleto.create(newBoleto);
 
   revalidatePath("/");
@@ -81,7 +84,7 @@ export async function createBoleto(data: {
     desconto,
     juros,
   };
-
+  await connectDB();
   await Boleto.create(newBoleto);
   revalidatePath("/");
 
@@ -89,19 +92,23 @@ export async function createBoleto(data: {
 }
 
 export async function updateBoletoStatus(line: string, status: BoletoStatus) {
+  await connectDB();
   await Boleto.updateOne({ linhaDigitavel: line }, { $set: { status } });
   revalidatePath("/");
 }
 
 export async function deleteBoleto(line: string) {
+  await connectDB();
   await Boleto.deleteOne({ linhaDigitavel: line });
   revalidatePath("/");
 }
 
 export async function getBoletoByLine(line: string) {
+  await connectDB();
   return Boleto.findOne({ linhaDigitavel: line });
 }
 
 export async function getBoletoByBarCode(barCode: string) {
+  await connectDB();
   return Boleto.findOne({ codigoDeBarras: barCode });
 }
