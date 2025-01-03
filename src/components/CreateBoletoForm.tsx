@@ -62,7 +62,7 @@ export default function CreateBoletoForm() {
       reset();
       setShowSuccess(true);
       router.refresh();
-    } catch (error) {
+    } catch {
       setErrorMessage("Erro ao criar boleto. Tente novamente.");
       setShowError(true);
     }
@@ -76,7 +76,7 @@ export default function CreateBoletoForm() {
 
       setShowSuccess(true);
       router.refresh();
-    } catch (error) {
+    } catch {
       setErrorMessage("Erro ao gerar boleto automático. Tente novamente.");
       setShowError(true);
     } finally {

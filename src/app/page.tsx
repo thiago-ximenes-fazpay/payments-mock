@@ -10,6 +10,7 @@ export default async function Home() {
   const _boletos = await getBoletos();
 
   const boletos = _boletos.map((_b) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {_id, ...boleto} = _b.toObject();
     return {
       ...boleto,

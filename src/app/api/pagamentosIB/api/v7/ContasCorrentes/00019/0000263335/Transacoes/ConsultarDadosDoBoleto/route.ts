@@ -1,6 +1,5 @@
 import { getBoletoByBarCode, getBoletoByLine } from "@/app/actions";
 import { HttpStatus } from "@/constants/HttpStatus";
-import Boleto from "@/server/db/boleto.model";
 import { hasRendimentoToken } from "@/utils/rendimento-token.middleware";
 import { NextRequest, NextResponse } from "next/server";
 

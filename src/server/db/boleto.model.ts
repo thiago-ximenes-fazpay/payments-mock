@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BoletoStatus } from '@/types/boleto';
 import mongoose, { Document, Schema } from 'mongoose';
 

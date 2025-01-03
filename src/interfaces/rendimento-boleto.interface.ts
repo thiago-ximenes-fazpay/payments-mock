@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BoletoStatus } from "@/types/boleto"
 
 export interface RendimentoBoletoResponse {
@@ -35,6 +36,7 @@ export interface RendimentoBoletoResponse {
   erroMessage: {
     statusCode: number | null
     message: string | null
+    
     errors: any[] | null
   } | null
   isSuccess: boolean | null

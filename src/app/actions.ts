@@ -9,11 +9,6 @@ import { faker, fakerPT_BR } from "@faker-js/faker";
 import { DateTime } from "luxon";
 import { revalidatePath } from "next/cache";
 
-// Generate a random boleto code
-function generateBoletoCode() {
-  return Math.random().toString(36).substring(2, 15);
-}
-
 export async function getBoletos() {
   return Boleto.find().sort({
     _id: -1,
